@@ -23,13 +23,17 @@
 
 
 ### APPROACH
-* Crawler - Scraping the site and extracting the data
+* crawler.py - Scraping the site and extracting the data
      - Crawles the apply pages and get to the fields | most of the time required cookies
      - Dynamic loading of the site 
-        - Accept cookies  - True or False
+        - Accept cookies  - True or False 
         - Time wait for the page to load
-        - Click some Apply Button / Have muliple pages next page
+        - Click some Apply Button / Have multiple pages next page 
+        - Captcha can be found on some of the pages
          
 
-* Checker/Validator -- Checking the data and making sure it is correct
-* Applyer -- (using selenium)
+* checker.py -- filters the field find the required fields and try to find it's locator which we using on the apply.py for applying and 
+communicate with the database to get the data
+        - Some required fields are not found on the our database
+        
+* apply.py -- (using selenium/playwright)
