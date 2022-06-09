@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
 
-'''
+"""
 Apply for the job
 
-'''
+"""
 import time
+
+import users
 from playwright.sync_api import Playwright, sync_playwright
 from playwright_stealth import stealth_sync
-import users
 
 
 def run(playwright: Playwright) -> None:
@@ -27,85 +28,94 @@ def run(playwright: Playwright) -> None:
     page.click("text=Apply")
     # Click text=OK
     # Click [placeholder="Email"]
-    page.click("[placeholder=\"Email\"]")
+    page.click('[placeholder="Email"]')
 
     # Fill [placeholder="Email"]
-    page.fill("[placeholder=\"Email\"]", users.user['email'])
+    page.fill('[placeholder="Email"]', users.user["email"])
 
     # Click [placeholder="Your name"]
-    page.click("[placeholder=\"Your name\"]")
+    page.click('[placeholder="Your name"]')
 
     # Fill [placeholder="Your name"]
-    page.fill("[placeholder=\"Your name\"]", users.user['name'])
+    page.fill('[placeholder="Your name"]', users.user["name"])
 
     # Click [placeholder="Phone number"]
-    page.click("[placeholder=\"Phone number\"]")
+    page.click('[placeholder="Phone number"]')
 
     # Fill [placeholder="Phone number"]
-    page.fill("[placeholder=\"Phone number\"]", users.user['phone'])
+    page.fill('[placeholder="Phone number"]', users.user["phone"])
 
     # Click [placeholder="Current or previous job title"]
-    page.click("[placeholder=\"Current or previous job title\"]")
+    page.click('[placeholder="Current or previous job title"]')
 
     # Fill [placeholder="Current or previous job title"]
-    page.fill("[placeholder=\"Current or previous job title\"]", users.user['title'])
+    page.fill(
+        '[placeholder="Current or previous job title"]', users.user["title"]
+    )
 
     # Click [placeholder="Link to your LinkedIn profile"]
-    page.click("[placeholder=\"Link to your LinkedIn profile\"]")
+    page.click('[placeholder="Link to your LinkedIn profile"]')
 
     # Fill [placeholder="Link to your LinkedIn profile"]
-    page.fill("[placeholder=\"Link to your LinkedIn profile\"]", users.user['linkedin'])
+    page.fill(
+        '[placeholder="Link to your LinkedIn profile"]', users.user["linkedin"]
+    )
 
     # Click [placeholder="Link to your Github"]
-    page.click("[placeholder=\"Link to your Github\"]")
+    page.click('[placeholder="Link to your Github"]')
 
     # Fill [placeholder="Link to your Github"]
-    page.fill("[placeholder=\"Link to your Github\"]", users.user['github'])
+    page.fill('[placeholder="Link to your Github"]', users.user["github"])
 
     # Click button:has-text("Select file")
     with page.expect_file_chooser() as fc_info:
-        page.click("button:has-text(\"Select file\")")
+        page.click('button:has-text("Select file")')
     file_chooser = fc_info.value
-    file_chooser.set_files(users.user['profile_path'])
+    file_chooser.set_files(users.user["profile_path"])
 
     name = page.locator("//iframe[@title='reCAPTCHA']").get_attribute("name")
     recaptcha = page.frame(name=name)
-    page.click("div[role=\"document\"] button:has-text(\"Apply\")")
+    page.click('div[role="document"] button:has-text("Apply")')
     token = page.query_selector('//input[@id="recaptcha-token"]')
     while token is None:
         print("Waiting for recaptcha")
         time.sleep(4)
-        recaptch_check = page.query_selector('//div[@class="recaptcha-checkbox-checkmark"]')
+        recaptch_check = page.query_selector(
+            '//div[@class="recaptcha-checkbox-checkmark"]'
+        )
         if recaptch_check is not None:
             print("Recaptcha Checked")
         page.query_selector('//input[@id="recaptcha-token"]')
-        name = page.locator("//iframe[@title='reCAPTCHA']").get_attribute("name")
+        name = page.locator("//iframe[@title='reCAPTCHA']").get_attribute(
+            "name"
+        )
         if name:
             stealth_sync(page)
-            page.frame(name=name).click("span[role=\"checkbox\"]")
+            page.frame(name=name).click('span[role="checkbox"]')
             time.sleep(2)
-            page.click("div[role=\"document\"] button:has-text(\"Apply\")")
+            page.click('div[role="document"] button:has-text("Apply")')
             time.sleep(4)
-            #breakpoint()
-            check_status = page.query_selector('//h5[contains(text(),"Your job is saved in your dashboard")]')
+            # breakpoint()
+            check_status = page.query_selector(
+                '//h5[contains(text(),"Your job is saved in your dashboard")]'
+            )
             if check_status:
                 print("Job Applied")
-                return {'status': 'success'}
+                return {"status": "success"}
             else:
                 frame_check = page.frame(name=name)
                 if frame_check:
-                    page.frame(name=name).click("span[role=\"checkbox\"]")
+                    page.frame(name=name).click('span[role="checkbox"]')
                     time.sleep(2)
-                    page.click("div[role=\"document\"] button:has-text(\"Apply\")")
+                    page.click('div[role="document"] button:has-text("Apply")')
                     print("Job not Applied")
                 else:
                     print("Job Applied")
-                    return {'status': 'success'}
+                    return {"status": "success"}
         token = page.query_selector('//input[@id="recaptcha-token"]')
         if token:
             token = token.get_property("value")
-        
-   
+
     context.close()
     browser.close()
 
